@@ -43,16 +43,19 @@ int main(){
         pid_t pz = wait(NULL);
         if(pz == pid1){
             int E1=clock_gettime(CLOCK_REALTIME,&e1);
-            printf("RunTime for first thread: %lfs",(e1.tv_sec-s1.tv_sec+e1.tv_nsec-s1.tv_nsec));
+            double ans=e1.tv_sec-s1.tv_sec+e1.tv_nsec-s1.tv_nsec;
+            printf("RunTime for first thread: %lfs",(ans));
 
         }
         else if(pz == pid2){
             int E2=clock_gettime(CLOCK_REALTIME,&e2);
-            printf("RunTime for second thread: %lfs",(e2.tv_sec-s2.tv_sec+e2.tv_nsec-s2.tv_nsec));
+            double ans2=e1.tv_sec-s1.tv_sec+e1.tv_nsec-s1.tv_nsec;
+            printf("RunTime for second thread: %lfs",(ans2));
         }
         else if(pz == pid3){
             int E3=clock_gettime(CLOCK_REALTIME,&e3);
-            printf("RunTime for first thread: %lfs",(e3.tv_sec-s3.tv_sec+e3.tv_nsec-s3.tv_nsec));
+            double ans3=e1.tv_sec-s1.tv_sec+e1.tv_nsec-s1.tv_nsec;
+            printf("RunTime for first thread: %lfs",(ans3));
         }
     }
 }
