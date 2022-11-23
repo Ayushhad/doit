@@ -27,16 +27,16 @@ int main(){
     pid1 =  fork(); pid2 = fork(); pid3 = fork();
     if(!pid1){
         sched_setscheduler(pid1,SCHED_OTHER,p1);
-        execlp("/bin/bash","bash","/home/ayushhad/Desktop/assignment2/Ques1/xx.sh",NULL);
+        execlp("/bin/bash","sh","bashs.sh",NULL);
     }
     
     else if(!pid2){
         sched_setscheduler(pid2,SCHED_RR,p2);
-        execlp("/bin/bash","bash","/home/ayushhad/Desktop/assignment2/Ques1/xx.sh",NULL);
+        execlp("/bin/bash","sh","bashs.sh",NULL);
     }
     else if(!pid3){
         sched_setscheduler(pid3,SCHED_FIFO,p3);
-        execlp("/bin/bash","bash","/home/ayushhad/Desktop/assignment2/Ques1/xx.sh",NULL);
+        execlp("/bin/bash","sh","bashs.sh",NULL);
     }
 
     for(int i =0; i<3; i++){
