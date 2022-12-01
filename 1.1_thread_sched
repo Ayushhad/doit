@@ -104,15 +104,13 @@ void* call_C(){
 int main(){
     
     pthread_t thr_A;
-    pthread_create(&thr_A, NULL, call_A, NULL);
-    pthread_join(thr_A, NULL);
-
     pthread_t thr_B;
-    pthread_create(&thr_B, NULL, call_B, NULL);
-    pthread_join(thr_B, NULL);
-
     pthread_t thr_C;
+    pthread_create(&thr_A, NULL, call_A, NULL);
+    pthread_create(&thr_B, NULL, call_B, NULL);
     pthread_create(&thr_C, NULL, call_C, NULL);
+    pthread_join(thr_A, NULL);
+    pthread_join(thr_B, NULL);
     pthread_join(thr_C, NULL);
     
     return 0;
