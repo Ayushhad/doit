@@ -6,56 +6,115 @@
 #include <sched.h>
 #include <math.h>
 #include <unistd.h>
-#include <sys/wait.h>
+
+
+void count_A(){
+    
+    long long i=1;
+    long long y = 1;
+    long long x=(y<<32);
+    while(i<=x) {
+        //printf("%lld",i);
+        i++;
+    }
+}
+
+void* call_A(){
+    nice(0);
+    struct sched_param* p1 = (struct sched_param*)malloc(sizeof(struct sched_param));
+    if(p1 != NULL) p1 -> sched_priority = 0;
+
+    pthread_setschedparam(pthread_self(), SCHED_OTHER, p1);
+
+    struct timespec s,e;
+    int st = clock_gettime(CLOCK_REALTIME,&s);
+    count_A();
+    int et = clock_gettime(CLOCK_REALTIME,&e);
+    struct timespec ans;
+    ans.tv_sec=(e.tv_sec-s.tv_sec);
+    ans.tv_nsec=(e.tv_nsec-s.tv_nsec);
+    double rt = ans.tv_sec + ans.tv_nsec/ 1e9L;
+
+    printf("countA's Run Time is %lfs\n",rt);
+
+    free(p1);
+    return NULL;
+}
+
+void count_B(){
+    long long i=1;
+    long long y = 1;
+    long long x=(y<<32);
+    while(i<=x) i++;
+}
+
+void* call_B(){
+    struct sched_param* p2 = (struct sched_param*)malloc(sizeof(struct sched_param));
+    if(p2 != NULL) p2 -> sched_priority = 1;
+
+    pthread_setschedparam(pthread_self(), SCHED_RR, p2);
+    /*int policy;
+    struct sched_param p;
+
+    pthread_getschedparam(pthread_self(),&policy,&p);
+    printf("p->%d p.s->%d",policy,p.sched_priority);*/
+    struct timespec s,e;
+    int st = clock_gettime(CLOCK_REALTIME,&s);
+    count_B();
+
+    int et = clock_gettime(CLOCK_REALTIME,&e);
+    struct timespec ans;
+    ans.tv_sec=(e.tv_sec-s.tv_sec);
+    ans.tv_nsec=(e.tv_nsec-s.tv_nsec);
+    double rt = ans.tv_sec + ans.tv_nsec/ 1e9L;
+
+    printf("countB's Run Time is %lfs\n",rt);
+    
+    free(p2);
+    return NULL;
+}
+
+void count_C(){
+    long long i=1;
+    long long y = 1;
+    long long x=(y<<32);
+    while(i<=x) i++;
+}
+
+void* call_C(){
+    struct sched_param* p3 = (struct sched_param*)malloc(sizeof(struct sched_param));
+    if(p3 != NULL) p3 -> sched_priority =1;
+
+    pthread_setschedparam(pthread_self(), SCHED_FIFO, p3);
+
+    struct timespec s,e;
+    int st = clock_gettime(CLOCK_REALTIME,&s);
+    count_C();
+    int et = clock_gettime(CLOCK_REALTIME,&e);
+    struct timespec ans;
+    ans.tv_sec=(e.tv_sec-s.tv_sec);
+    ans.tv_nsec=(e.tv_nsec-s.tv_nsec);
+    double rt = ans.tv_sec + ans.tv_nsec/ 1e9L;
+    printf("countC's Run Time is %lfs\n",rt);
+    
+    free(p3);
+    return NULL;
+}
 
 int main(){
-    pid_t pid1, pid2, pid3;
-
-    struct sched_param* p1 = (struct sched_param*)malloc(sizeof(struct sched_param));
-    if(p1!=NULL) p1->sched_priority=0;
-
-    struct sched_param* p2 = (struct sched_param*)malloc(sizeof(struct sched_param));
-    if(p2!=NULL) p2->sched_priority=1;
-
-    struct sched_param* p3 = (struct sched_param*)malloc(sizeof(struct sched_param));
-    if(p3!=NULL) p3->sched_priority=1;
-
-    struct timespec s1,s2,s3,e1,e2,e3;
-    int S1 = clock_gettime(CLOCK_REALTIME, &s1);
-    int S2 = clock_gettime(CLOCK_REALTIME, &s2);
-    int S3 = clock_gettime(CLOCK_REALTIME, &s3);
-    pid1 =  fork(); pid2 = fork(); pid3 = fork();
-    if(!pid1){
-        sched_setscheduler(pid1,SCHED_OTHER,p1);
-        execlp("/bin/bash","sh","bashs.sh",NULL);
-    }
     
-    else if(!pid2){
-        sched_setscheduler(pid2,SCHED_RR,p2);
-        execlp("/bin/bash","sh","bashs.sh",NULL);
-    }
-    else if(!pid3){
-        sched_setscheduler(pid3,SCHED_FIFO,p3);
-        execlp("/bin/bash","sh","bashs.sh",NULL);
-    }
+    pthread_t thr_A;
+    pthread_t thr_B;
+    pthread_t thr_C;
+    pthread_create(&thr_A, NULL, call_A, NULL);
 
-    for(int i =0; i<3; i++){
-        pid_t pz = wait(NULL);
-        if(pz == pid1){
-            int E1=clock_gettime(CLOCK_REALTIME,&e1);
-            double ans=e1.tv_sec-s1.tv_sec+e1.tv_nsec-s1.tv_nsec;
-            printf("RunTime for first thread: %lfs",(ans));
+    pthread_create(&thr_B, NULL, call_B, NULL);
 
-        }
-        else if(pz == pid2){
-            int E2=clock_gettime(CLOCK_REALTIME,&e2);
-            double ans2=e1.tv_sec-s1.tv_sec+e1.tv_nsec-s1.tv_nsec;
-            printf("RunTime for second thread: %lfs",(ans2));
-        }
-        else if(pz == pid3){
-            int E3=clock_gettime(CLOCK_REALTIME,&e3);
-            double ans3=e1.tv_sec-s1.tv_sec+e1.tv_nsec-s1.tv_nsec;
-            printf("RunTime for first thread: %lfs",(ans3));
-        }
-    }
+    pthread_create(&thr_C, NULL, call_C, NULL);
+    pthread_join(thr_A, NULL);
+    pthread_join(thr_B, NULL);
+    pthread_join(thr_C, NULL);
+    
+    return 0;
+    
 }
